@@ -2,59 +2,72 @@ const { EmbedBuilder } = require('discord.js');
 const Giveaway = require('../models/giveaway');
 
 async function endGiveaway(client, giveaway) {
-    console.log(`[END_GIVEAWAY] Starting to process giveaway for prize: "${giveaway.prize}" (Message ID: ${giveaway.messageId})`);
-    
     const channel = await client.channels.fetch(giveaway.channelId).catch(() => null);
-    if (!channel) return console.error(`[END_GIVEAWAY_ERROR] Channel ${giveaway.channelId} not found or inaccessible.`);
-    console.log(`[END_GIVEAWAY] Successfully fetched channel: #${channel.name}`);
+    if (!channel) {
+        console.error(`Giveaway End Error: Channel ${giveaway.channelId} could not be found.`);
+        // Mark as ended to prevent retries
+        await Giveaway.updateOne({ _id: giveaway._id }, { ended: true });
+        return;
+    }
 
     const message = await channel.messages.fetch(giveaway.messageId).catch(() => null);
-    if (!message) return console.error(`[END_GIVEAWAY_ERROR] Giveaway message ${giveaway.messageId} not found.`);
-    console.log(`[END_GIVEAWAY] Successfully fetched giveaway message.`);
-
-    const reaction = message.reactions.cache.get('🎉');
-    if (!reaction) {
-        console.log('[END_GIVEAWAY] No 🎉 reaction found on the message. Ending with no winners.');
+    if (!message) {
+        console.error(`Giveaway End Error: Message ${giveaway.messageId} could not be found.`);
+        await Giveaway.updateOne({ _id: giveaway._id }, { ended: true });
+        return;
     }
-    const users = await reaction?.users.fetch().catch(() => new Map()) || new Map();
-    const participants = users.filter(user => !user.bot).map(user => user.id);
-    console.log(`[END_GIVEAWAY] Found ${participants.length} valid participant(s).`);
 
+    // --- THE FIX: Properly handle reaction fetching ---
+    const reaction = message.reactions.cache.get('🎉');
+    let participants = [];
+
+    // Only fetch users if the reaction exists
+    if (reaction) {
+        const users = await reaction.users.fetch();
+        participants = users.filter(user => !user.bot).map(user => user.id);
+    }
+    
     giveaway.participants = participants;
     let winners = [];
+
     if (participants.length > 0) {
+        // Ensure we don't try to pick more winners than there are participants
         const winnerCount = Math.min(giveaway.winnerCount, participants.length);
         let potentialWinners = [...participants];
+
         for (let i = 0; i < winnerCount; i++) {
             const winnerIndex = Math.floor(Math.random() * potentialWinners.length);
             winners.push(potentialWinners[winnerIndex]);
+            // Remove the winner from the potential list so they can't win twice
             potentialWinners.splice(winnerIndex, 1);
         }
     }
-    console.log(`[END_GIVEAWAY] Picked winners: [${winners.join(', ')}]`);
-
+    
     giveaway.winners = winners;
     giveaway.ended = true;
     await giveaway.save();
-    console.log('[END_GIVEAWAY] Saved final giveaway state to database.');
 
+    // --- Announcement Logic ---
     const winnerTags = winners.map(id => `<@${id}>`).join(', ');
-    const announcement = winners.length > 0 ? `Congratulations ${winnerTags}! You won the **${giveaway.prize}**!` : 'No one entered the giveaway, so there are no winners.';
-    const endedEmbed = new EmbedBuilder()
-        .setColor('#dc3545').setTitle(`🎁 Giveaway Ended! 🎁`)
-        .setDescription(`**Prize:** ${giveaway.prize}\n\n**Winner(s):** ${winners.length > 0 ? winnerTags : 'None'}\nHosted by: <@${giveaway.hostedBy}>`)
-        .setTimestamp(giveaway.endsAt).setFooter({ text: 'Giveaway ended' });
+    const announcement = winners.length > 0 
+        ? `Congratulations ${winnerTags}! You won the **${giveaway.prize}**!`
+        : 'No one entered the giveaway, so there are no winners.';
 
+    const endedEmbed = new EmbedBuilder()
+        .setColor('#dc3545')
+        .setTitle(`Giveaway Ended! `)
+        .setDescription(`**Prize:** ${giveaway.prize}\n\n**Winner(s):** ${winners.length > 0 ? winnerTags : 'None'}\nHosted by: <@${giveaway.hostedBy}>`)
+        .setTimestamp(giveaway.endsAt)
+        .setFooter({ text: 'Giveaway ended' });
+
+    // Edit the original giveaway message and send a new one with the announcement
     await message.edit({ embeds: [endedEmbed], components: [] });
-    console.log('[END_GIVEAWAY] Edited original giveaway message.');
     await channel.send(announcement);
-    console.log('[END_GIVEAWAY] Sent winner announcement. Process complete.');
 }
 
 function startGiveawayChecker(client) {
     console.log('✅ Giveaway checker started. Will check for ended giveaways every 15 seconds.');
     setInterval(async () => {
-        console.log('[GIVEAWAY_CHECKER] Running periodic check...');
         const expiredGiveaways = await Giveaway.find({ ended: false, endsAt: { $lte: new Date() } });
 
         if (expiredGiveaways.length > 0) {
@@ -62,8 +75,6 @@ function startGiveawayChecker(client) {
             for (const giveaway of expiredGiveaways) {
                 await endGiveaway(client, giveaway);
             }
-        } else {
-            console.log('[GIVEAWAY_CHECKER] No expired giveaways found.');
         }
     }, 15000); // Check every 15 seconds
 }
