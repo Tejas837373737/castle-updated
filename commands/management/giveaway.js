@@ -44,7 +44,7 @@ module.exports = {
                     .setTimestamp(endsAt);
                 
                 const giveawayMessage = await message.channel.send({ embeds: [embed] });
-                await giveawayMessage.react('<a:Giveaway:1382330301006741566>');
+                await giveawayMessage.react('🎉');
 
                 const newGiveaway = new Giveaway({
                     messageId: giveawayMessage.id,
