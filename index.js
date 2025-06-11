@@ -8,50 +8,63 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent, // Essential for reading message content
+        GatewayIntentBits.MessageContent,
     ],
 });
 
-// Command Handler
+client.snipes = new Map();
+client.multiSnipes = new Map();
 client.commands = new Collection();
+
+console.log('--- Loading Commands ---');
 const commandFolders = fs.readdirSync('./commands');
 for (const folder of commandFolders) {
     const commandFiles = fs.readdirSync(`./commands/${folder}`).filter(file => file.endsWith('.js'));
     for (const file of commandFiles) {
-        const command = require(`./commands/${folder}/${file}`);
-        client.commands.set(command.name, command);
+        try {
+            const command = require(`./commands/${folder}/${file}`);
+            client.commands.set(command.name, command);
+            console.log(`- Loaded: ${file}`);
+        } catch (error) {
+            console.error(`Failed to load command ${file}:`, error);
+        }
     }
 }
 
-// Event Handler (for the 'ready' event)
-client.once('ready', () => {
-    console.log(`Ready! Logged in as ${client.user.tag}`);
-    client.user.setActivity(`${process.env.PREFIX}help`);
-});
+console.log('--- Loading Events ---');
+const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
+for (const file of eventFiles) {
+    try {
+        const event = require(`./events/${file}`);
+        if (event.once) {
+            client.once(event.name, (...args) => event.execute(...args, client));
+        } else {
+            client.on(event.name, (...args) => event.execute(...args, client));
+        }
+        console.log(`- Loaded: ${file}`);
+    } catch (error) {
+        console.error(`Failed to load event ${file}:`, error);
+    }
+}
 
-// Message Create Event (Command Execution)
 client.on('messageCreate', async message => {
-    if (message.author.bot || !message.guild) return;
-    if (!message.content.startsWith(process.env.PREFIX)) return;
-
+    if (message.author.bot || !message.guild || !message.content.startsWith(process.env.PREFIX)) return;
     const args = message.content.slice(process.env.PREFIX.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
-
     const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-
     if (!command) return;
-
     try {
         await command.execute(message, args, client);
     } catch (error) {
-        console.error(error);
-        message.reply('There was an error trying to execute that command!');
+        console.error(`Error executing ${commandName}`, error);
     }
 });
 
-// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('Connected to MongoDB!'))
-    .catch(err => console.error('Could not connect to MongoDB:', err));
-
-client.login(process.env.TOKEN);
+    .then(() => {
+        console.log('Connected to MongoDB!');
+        client.login(process.env.TOKEN);
+    }).catch(err => console.error('DB Connection Error:', err));
+    mongoose.connection.on('disconnected', () => {
+    console.log('MongoDB: Connection disconnected.');
+});

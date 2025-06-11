@@ -1,34 +1,52 @@
 const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
-    name: 'avatar',
-    description: 'Displays a user\'s avatar in an embed with download links.',
+    name: 'av',
+    description: ' Displays a user\'s avatar by mention or ID.',
     aliases: ['icon', 'pfp'],
-    execute(message) {
-        // Find the target user. If no user is mentioned, it defaults to the author of the message.
-        const targetUser = message.mentions.users.first() || message.author;
+    usage: '[@user|userID]',
+    // The function is now async to handle fetching users
+    async execute(message, args, client) {
+        let targetUser;
 
-        // Get the avatar URLs in different formats and sizes
+        try {
+            // --- THE FIX: The Target Resolver Logic ---
+
+            // 1. Check for a mentioned user first
+            if (message.mentions.users.first()) {
+                targetUser = message.mentions.users.first();
+            } 
+            // 2. If no mention, check if an argument (the ID) was provided
+            else if (args[0]) {
+                targetUser = await client.users.fetch(args[0]);
+            } 
+            // 3. If no mention and no ID, default to the command author
+            else {
+                targetUser = message.author;
+            }
+        } catch (error) {
+            console.error('Error fetching user for avatar command:', error);
+            const errorEmbed = new EmbedBuilder()
+                .setColor('#dc3545')
+                .setTitle('User Not Found')
+                .setDescription('Could not find that user. Please provide a valid mention or User ID.');
+            return message.reply({ embeds: [errorEmbed] });
+        }
+        
+        // --- Embed Creation (This part remains the same) ---
         const avatarPNG = targetUser.displayAvatarURL({ format: 'png', size: 1024 });
         const avatarJPG = targetUser.displayAvatarURL({ format: 'jpg', size: 1024 });
         const avatarWEBP = targetUser.displayAvatarURL({ format: 'webp', size: 1024 });
-        const avatarGIF = targetUser.displayAvatarURL({ dynamic: true, size: 1024 }); // For animated avatars
+        const avatarGIF = targetUser.displayAvatarURL({ dynamic: true, size: 1024 });
 
-        // Create the embed message
         const avatarEmbed = new EmbedBuilder()
-            .setColor('#0099ff') // You can set any hex color
+            .setColor('#0099ff')
             .setTitle(`Avatar of ${targetUser.username}`)
-            .setImage(avatarGIF) // Set the main image to the user's avatar (dynamic to support GIFs)
-            .setDescription(
-                `Download as:\n` +
-                `[PNG](${avatarPNG}) | ` +
-                `[JPG](${avatarJPG}) | ` +
-                `[WEBP](${avatarWEBP})`
-            )
+            .setImage(avatarGIF)
+            .setDescription(`Download as:\n[PNG](${avatarPNG}) | [JPG](${avatarJPG}) | [WEBP](${avatarWEBP})`)
             .setTimestamp()
             .setFooter({ text: `Requested by ${message.author.username}`, iconURL: message.author.displayAvatarURL({ dynamic: true }) });
 
-        // Send the embed as a reply
-        message.channel.send({ embeds: [avatarEmbed] });
+        await message.channel.send({ embeds: [avatarEmbed] });
     },
 };

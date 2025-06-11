@@ -5,50 +5,62 @@ const ms = require('ms');
 
 module.exports = {
     name: 'mute',
-    description: 'Mutes a member for a specified time.',
+    description: 'Mutes a member with an optional duration (defaults to permanent).',
     aliases: ['timeout'],
-    usage: '@user <duration> [reason]',
+    usage: '<@user|userID> [duration] [reason]',
     async execute(message, args) {
         // --- Permission Check ---
         const guildConfig = await GuildConfig.findOne({ guildId: message.guild.id });
         if (!guildConfig || !message.member.roles.cache.has(guildConfig.modRole)) {
-            return message.reply({ embeds: [new EmbedBuilder().setColor('#dc3545').setTitle('<a:wrong:1381568998847545428> Permission Denied').setDescription('You do not have the moderator role.')] });
+            return message.reply({ embeds: [new EmbedBuilder().setColor('#dc3545').setTitle('<a:wrong:1381568998847545428> Permission Denied').setDescription('You do not have the moderator role.')]});
         }
 
-        // --- Target User Check ---
-        const target = message.mentions.users.first();
-        if (!target) {
-            return message.reply({ embeds: [new EmbedBuilder().setColor('#dc3545').setTitle('<a:wrong:1381568998847545428> Error').setDescription(`**Usage:** \`${process.env.PREFIX}mute @user <duration> [reason]\``)] });
+        // --- Target Resolver ---
+        if (!args[0]) return message.reply({ embeds: [new EmbedBuilder().setColor('#dc3545').setTitle('<a:wrong:1381568998847545428> Error').setDescription(`**Usage:** \`${process.env.PREFIX}mute <@user|userID> [duration] [reason]\``)]});
+        
+        let member;
+        try {
+            const mentionedUser = message.mentions.members.first();
+            if (mentionedUser) {
+                member = mentionedUser;
+            } else {
+                member = await message.guild.members.fetch(args[0]);
+            }
+        } catch (error) {
+            return message.reply({ embeds: [new EmbedBuilder().setColor('#dc3545').setTitle('<a:wrong:1381568998847545428> Invalid User').setDescription('Could not find that user in this server. Please provide a valid mention or User ID.')]});
+        }
+        const target = member.user;
+
+        // --- NEW, FIXED Argument Parsing Logic ---
+        const permanentDuration = 28 * 24 * 60 * 60 * 1000; // 28 days in milliseconds
+        let durationMs;
+        let durationArg;
+        let reason;
+        
+        const potentialDuration = args[1];
+        const parsedMs = ms(potentialDuration || '0'); // Try parsing the second argument
+
+        if (typeof parsedMs === 'number' && parsedMs > 0) {
+            // Case 1: A valid duration was provided as the second argument
+            durationMs = parsedMs;
+            durationArg = potentialDuration;
+            reason = args.slice(2).join(' ') || 'No reason provided';
+        } else {
+            // Case 2: No valid duration found, so it's a permanent mute
+            durationMs = permanentDuration;
+            durationArg = 'Permanent (28 Days)';
+            reason = args.slice(1).join(' ') || 'No reason provided';
         }
 
-        const member = message.guild.members.resolve(target);
-        if (!member) {
-            return message.reply({ embeds: [new EmbedBuilder().setColor('#dc3545').setTitle('<a:wrong:1381568998847545428> Error').setDescription("That user isn't in this guild.")] });
+        if (durationMs > permanentDuration) {
+             return message.reply({ embeds: [new EmbedBuilder().setColor('#dc3545').setTitle('Duration Too Long').setDescription('The mute duration cannot exceed 28 days.')]});
         }
         
-        // --- Argument Validation (The Fix) ---
-        const durationArg = args[1];
-        if (!durationArg) {
-            return message.reply({ embeds: [new EmbedBuilder().setColor('#dc3545').setTitle('<a:wrong:1381568998847545428> Missing Argument').setDescription('You must provide a duration (e.g., 10m, 1h, 1d).')] });
-        }
-
-        const durationMs = ms(durationArg); // 'ms' will return a number in milliseconds or undefined
-        if (typeof durationMs === 'undefined') {
-            return message.reply({ embeds: [new EmbedBuilder().setColor('#dc3545').setTitle('<a:wrong:1381568998847545428> Invalid Duration').setDescription('You have provided an invalid duration. Please use a format like `10m`, `1h`, or `7d`.')] });
-        }
-        
-        // Duration cannot exceed 28 days (Discord API limit)
-        if (durationMs > 2419200000) {
-             return message.reply({ embeds: [new EmbedBuilder().setColor('#dc3545').setTitle('<a:wrong:1381568998847545428> Duration Too Long').setDescription('The mute duration cannot exceed 28 days.')] });
-        }
-
         // --- Action ---
-        const reason = args.slice(2).join(' ') || 'No reason provided';
-
         try {
             await member.timeout(durationMs, reason);
 
-            // --- Confirmation Message ---
+            // --- Confirmation & Logging ---
             const successEmbed = new EmbedBuilder()
                 .setColor('#28a745')
                 .setTitle('<a:Green_Tick:1381583016073363508> User Muted')
@@ -60,7 +72,6 @@ module.exports = {
                 ).setTimestamp();
             await message.channel.send({ embeds: [successEmbed] });
 
-            // --- Logging ---
             await sendModLog(
                 message.client,
                 message.guild,
@@ -75,7 +86,7 @@ module.exports = {
             );
         } catch (error) {
             console.error(error);
-            message.reply({ embeds: [new EmbedBuilder().setColor('#dc3545').setTitle('Error').setDescription('I was unable to mute this member. They may have a higher role than me.')] });
+            message.reply({ embeds: [new EmbedBuilder().setColor('#dc3545').setTitle('Error').setDescription('I was unable to mute this member. They may have a higher role than me.')]});
         }
     },
 };

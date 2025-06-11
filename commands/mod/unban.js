@@ -4,37 +4,35 @@ const { sendModLog } = require('../../utils/modlog');
 
 module.exports = {
     name: 'unban',
-    description: 'Revokes the ban for a member using their user ID.',
-    usage: '<userID> [reason]',
+    description: 'Revokes the ban for a user using their user ID.',
+    usage: '<userID>',
     async execute(message, args) {
         // --- Permission Check ---
         const guildConfig = await GuildConfig.findOne({ guildId: message.guild.id });
         if (!guildConfig || !message.member.roles.cache.has(guildConfig.modRole)) {
-            const noPermsEmbed = new EmbedBuilder()
-                .setColor('#dc3545')
-                .setTitle('<a:wrong:1381568998847545428> Permission Denied')
-                .setDescription('You do not have the required moderator role to use this command.');
-            return message.reply({ embeds: [noPermsEmbed] });
+            return message.reply({ embeds: [new EmbedBuilder().setColor('#dc3545').setTitle('<a:wrong:1381568998847545428> Permission Denied').setDescription('You do not have the required moderator role to use this command.')] });
         }
 
-        // --- Target User ID Check ---
-        const userId = args[0];
-        if (!userId) {
+        // --- Target User ID Resolver (THE UPGRADE) ---
+        const userIdArg = args[0];
+        if (!userIdArg) {
             const noIdEmbed = new EmbedBuilder()
                 .setColor('#dc3545')
                 .setTitle('<a:wrong:1381568998847545428> Error')
-                .setDescription('You must provide the User ID of the person you want to unban.');
+                .setDescription(`**Usage:** \`${process.env.PREFIX}unban <userID>\`\nYou must provide the User ID of the person you want to unban.`);
             return message.reply({ embeds: [noIdEmbed] });
         }
+        // This removes the <@ > characters if a mention is passed, leaving only the ID.
+        const userId = userIdArg.replace(/<@!?|>/g, '');
 
         // --- Action ---
         const reason = args.slice(1).join(' ') || 'No reason provided';
 
         try {
-            // Fetch the banned user to ensure they are actually banned
+            // Fetch the banned user to ensure they are actually banned and to get their tag
             const bannedUser = await message.guild.bans.fetch(userId);
             if (!bannedUser) {
-                 return message.reply({ embeds: [new EmbedBuilder().setColor('#dc3545').setTitle('<a:wrong:1381568998847545428> Error').setDescription('This user is not banned from the server.')] });
+                 return message.reply({ embeds: [new EmbedBuilder().setColor('#dc3545').setTitle('<a:wrong:1381568998847545428> Error').setDescription('This user is not on the server\'s ban list.')] });
             }
 
             // Unban the user
@@ -45,12 +43,10 @@ module.exports = {
                 .setColor('#28a745')
                 .setTitle('<a:Green_Tick:1381583016073363508> User Unbanned')
                 .addFields(
-                    // We use bannedUser.user.tag because we fetched the ban information
                     { name: 'User', value: bannedUser.user.tag, inline: true },
                     { name: 'Moderator', value: message.author.tag, inline: true },
                     { name: 'Reason', value: reason }
-                )
-                .setTimestamp();
+                ).setTimestamp();
             await message.channel.send({ embeds: [successEmbed] });
 
             // --- Logging ---
@@ -58,7 +54,7 @@ module.exports = {
                 message.client,
                 message.guild,
                 'User Unbanned ✅',
-                '#20c997', // A teal/green color
+                '#20c997', // Teal/green color
                 [
                     { name: 'User', value: `${bannedUser.user.tag} (${bannedUser.user.id})` },
                     { name: 'Moderator', value: `${message.author.tag} (${message.author.id})` },
@@ -68,7 +64,6 @@ module.exports = {
 
         } catch (error) {
             console.error(error);
-            // Catch errors, such as if the user ID is invalid or the user isn't banned
             message.reply({ embeds: [new EmbedBuilder().setColor('#dc3545').setTitle('Error').setDescription('Could not unban this user. Please ensure the User ID is correct and the user is actually banned.')] });
         }
     },

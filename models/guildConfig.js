@@ -17,6 +17,22 @@ const guildConfigSchema = new Schema({
         type: String,
         required: false,
      },
+      managerRoleId: {
+        type: String,
+        required: false, // Optional, as not all servers may use it
+    },
+     snipeLogChannelId: {
+        type: String,
+        required: false,
+    },
+     serverLogChannelId: { // This is your new server log
+        type: String,
+        required: false,
+    },
+     countableChannels: {
+        type: [String], // This will be an array of channel IDs
+        default: [],
+    },
 });
 
 // Creates and exports the Mongoose model based on the schema.

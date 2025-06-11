@@ -1,72 +1,82 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const fs = require('fs');
 
 module.exports = {
     name: 'help',
-    description: 'Lists all available commands or info about a specific command.',
-    aliases: ['commands'],
-    execute(message, args, client) {
-        // The prefix is fetched from your .env file
-        const prefix = process.env.PREFIX;
+    description: 'Displays an interactive help and settings panel.',
+    aliases: ['settings', 'config'],
+    async execute(message, args, client) {
 
-        // If no arguments are provided (i.e., just '!help')
-        if (!args.length) {
-            const helpEmbed = new EmbedBuilder()
-                .setColor('#0099ff')
-                .setTitle(' <a:Moderation:1381564322278281246> Bot Commands')
-                .setDescription(`Here is a list of all available commands.\nFor more details on a specific command, type \`${prefix}help [command name]\`.`);
+        // --- Links ---
+        let linksString = '';
+        const inviteLink = process.env.BOT_INVITE_LINK;
+        const supportLink = process.env.SUPPORT_SERVER_INVITE;
+        if (inviteLink) linksString += `[Invite Me](${inviteLink})`;
+        if (supportLink) {
+            if (linksString) linksString += ' | ';
+            linksString += `[Support Server](${supportLink})`;
+        }
 
-            // Read the sub-folders in the 'commands' directory
-            const commandFolders = fs.readdirSync('./commands');
+        // --- The Main Introduction Embed ---
+        const mainEmbed = new EmbedBuilder()
+            .setColor('#5865F2')
+            .setTitle(`Welcome to ${client.user.username}!`)
+            .setDescription(`I'm a multi-purpose bot designed to help you manage and engage your community. You can find my features below.`)
+            .setThumbnail(client.user.displayAvatarURL())
+            .addFields(
+                { name: 'My Prefix', value: `My command prefix is \`${process.env.PREFIX}\``, inline: true },
+                { name: 'Get Started', value: 'Use the dropdowns below to navigate through my commands or view server settings.', inline: true }
+            );
+        if (linksString) {
+            mainEmbed.addFields({ name: '<:Heart_1:1382335432657997947> Quick Links', value: linksString, inline: false });
+        }
 
-            for (const folder of commandFolders) {
-                // Get all the command files in the sub-folder
-                const commandFiles = fs.readdirSync(`./commands/${folder}`).filter(file => file.endsWith('.js'));
-                
-                // Map the command files to a string with their name and description
-                const commandList = commandFiles
-                    .map(file => {
-                        const command = require(`../${folder}/${file}`);
-                        return `\`${command.name}\``; // Just show the command name
-                    })
-                    .join(', '); // Join with a comma and space
+        // --- Dropdown for Command Categories ---
+        const commandFolders = fs.readdirSync('./commands');
+        const commandDropdownOptions = commandFolders.map(folder => ({
+            label: `${folder.charAt(0).toUpperCase() + folder.slice(1)} Commands`,
+            value: `category_${folder}`,
+            description: `Browse all commands in the ${folder} category.`,
+        }));
+        const commandSelectMenu = new StringSelectMenuBuilder()
+            .setCustomId('command_category_select')
+            .setPlaceholder('Browse Command Categories...')
+            .addOptions(commandDropdownOptions);
 
-                if (commandList) {
-                    // Add a field to the embed for each category
-                    helpEmbed.addFields({
-                        // Capitalize the folder name for the field title
-                        name: `**${folder.charAt(0).toUpperCase() + folder.slice(1)}**`,
-                        value: commandList,
-                    });
+        // --- Dropdown for Server Settings (THIS IS THE FIXED PART) ---
+        const settingsSelectMenu = new StringSelectMenuBuilder()
+            .setCustomId('settings_select_menu')
+            .setPlaceholder(' View & Manage Server Settings...')
+            .addOptions([
+                {
+                    label: 'Moderator Role',
+                    description: 'View/Set the role for moderation commands.',
+                    value: 'setting_mod_role',
+                    emoji: '<:Adminn:1382326000574136361>'
+                },
+                {
+                    label: 'Manager Role',
+                    description: 'View/Set the role for management commands.',
+                    value: 'setting_manager_role',
+                    emoji: '<:adminn1:1382325697963622481>'
+                },
+                {
+                    label: 'Logging Channels',
+                    description: 'View/Set all logging channels (mod, server, snipe).',
+                    value: 'setting_log_channels',
+                    emoji: '<:settings:1382325149235286030>'
+                },
+                {
+                    label: 'Message Counting',
+                    description: 'Manage channels for message counting.',
+                    value: 'setting_message_count',
+                    emoji: '<:chat:1382326680521277510>'
                 }
-            }
+            ]);
 
-            return message.channel.send({ embeds: [helpEmbed] });
-        }
+        const commandActionRow = new ActionRowBuilder().addComponents(commandSelectMenu);
+        const settingsActionRow = new ActionRowBuilder().addComponents(settingsSelectMenu);
 
-        // If a specific command is asked for (e.g., '!help kick')
-        const commandName = args[0].toLowerCase();
-        const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-
-        if (!command) {
-            return message.reply('That\'s not a valid command!');
-        }
-
-        // Create an embed for the specific command
-        const commandEmbed = new EmbedBuilder()
-            .setColor('#0099ff')
-            .setTitle(`Command: \`  ${command.name}\``)
-            .setDescription(command.description || 'No description available.');
-
-        if (command.aliases) {
-            commandEmbed.addFields({ name: 'Aliases', value: `\`${command.aliases.join(', ')}\``, inline: true });
-        }
-
-        // A good practice is to add a 'usage' property to your command files
-        if (command.usage) {
-            commandEmbed.addFields({ name: 'Usage', value: `\`${prefix}${command.name} ${command.usage}\``, inline: true });
-        }
-
-        return message.channel.send({ embeds: [commandEmbed] });
+        await message.reply({ embeds: [mainEmbed], components: [commandActionRow, settingsActionRow] });
     },
 };
