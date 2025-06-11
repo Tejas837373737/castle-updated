@@ -18,7 +18,7 @@ async function endGiveaway(client, giveaway) {
     }
 
     // --- THE FIX: Properly handle reaction fetching ---
-    const reaction = message.reactions.cache.get('<a:Giveaway:1382330301006741566>');
+    const reaction = message.reactions.cache.get('🎉');
     let participants = [];
 
     // Only fetch users if the reaction exists
