@@ -5,6 +5,10 @@ async function endGiveaway(client, giveaway) {
     const channel = await client.channels.fetch(giveaway.channelId).catch(() => null);
     if (!channel) {
         console.error(`Giveaway End Error: Channel ${giveaway.channelId} could not be found.`);
+<<<<<<< HEAD
+=======
+        // Mark as ended to prevent retries
+>>>>>>> b10663632ba29a22c353f7d06e01ba6a178b7bbb
         await Giveaway.updateOne({ _id: giveaway._id }, { ended: true });
         return;
     }
@@ -16,8 +20,13 @@ async function endGiveaway(client, giveaway) {
         return;
     }
 
+<<<<<<< HEAD
     // --- THE FIX: Look for your specific custom emoji ID ---
     const reaction = message.reactions.cache.get('1382330301006741566');
+=======
+    // --- THE FIX: Properly handle reaction fetching ---
+    const reaction = message.reactions.cache.get('🎉');
+>>>>>>> b10663632ba29a22c353f7d06e01ba6a178b7bbb
     let participants = [];
 
     // Only fetch users if the reaction exists
@@ -30,12 +39,14 @@ async function endGiveaway(client, giveaway) {
     let winners = [];
 
     if (participants.length > 0) {
+        // Ensure we don't try to pick more winners than there are participants
         const winnerCount = Math.min(giveaway.winnerCount, participants.length);
         let potentialWinners = [...participants];
 
         for (let i = 0; i < winnerCount; i++) {
             const winnerIndex = Math.floor(Math.random() * potentialWinners.length);
             winners.push(potentialWinners[winnerIndex]);
+            // Remove the winner from the potential list so they can't win twice
             potentialWinners.splice(winnerIndex, 1);
         }
     }
@@ -44,10 +55,12 @@ async function endGiveaway(client, giveaway) {
     giveaway.ended = true;
     await giveaway.save();
 
+    // --- Announcement Logic ---
     const winnerTags = winners.map(id => `<@${id}>`).join(', ');
     const announcement = winners.length > 0 
         ? `Congratulations ${winnerTags}! You won the **${giveaway.prize}**!`
         : 'No one entered the giveaway, so there are no winners.';
+<<<<<<< HEAD
 
     const endedEmbed = new EmbedBuilder()
         .setColor('#dc3545')
@@ -55,7 +68,17 @@ async function endGiveaway(client, giveaway) {
         .setDescription(`**Prize:** ${giveaway.prize}\n\n**Winner(s):** ${winners.length > 0 ? winnerTags : 'None'}\nHosted by: <@${giveaway.hostedBy}>`)
         .setTimestamp(giveaway.endsAt)
         .setFooter({ text: 'Giveaway ended' });
+=======
+>>>>>>> b10663632ba29a22c353f7d06e01ba6a178b7bbb
 
+    const endedEmbed = new EmbedBuilder()
+        .setColor('#dc3545')
+        .setTitle(`Giveaway Ended! `)
+        .setDescription(`**Prize:** ${giveaway.prize}\n\n**Winner(s):** ${winners.length > 0 ? winnerTags : 'None'}\nHosted by: <@${giveaway.hostedBy}>`)
+        .setTimestamp(giveaway.endsAt)
+        .setFooter({ text: 'Giveaway ended' });
+
+    // Edit the original giveaway message and send a new one with the announcement
     await message.edit({ embeds: [endedEmbed], components: [] });
     await channel.send(announcement);
 }
