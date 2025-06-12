@@ -4,7 +4,9 @@
   "description": "A Discord moderation bot.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "npm run deploy && npm run bot",
+    "deploy": "node deploy-commands.js",
+    "bot": "node index.js"
   },
   "keywords": [],
   "author": "",
