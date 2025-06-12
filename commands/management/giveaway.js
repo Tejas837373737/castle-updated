@@ -62,11 +62,7 @@ module.exports = {
                 if (defaultBanner) embed.setImage(defaultBanner);
                 
                 const giveawayMessage = await message.channel.send({ embeds: [embed] });
-<<<<<<< HEAD
                 await giveawayMessage.react(GIVEAWAY_EMOJI_ID);
-=======
-                await giveawayMessage.react('🎉');
->>>>>>> b10663632ba29a22c353f7d06e01ba6a178b7bbb
 
                 const newGiveaway = new Giveaway({ messageId: giveawayMessage.id, channelId: message.channel.id, guildId: message.guild.id, prize, winnerCount, endsAt, hostedBy: message.author.id });
                 await newGiveaway.save();
@@ -122,7 +118,6 @@ module.exports = {
                 message.reply(`Invalid subcommand. Use \`create\`, \`reroll\`, \`end\`, or \`participants\`.`);
         }
     },
-<<<<<<< HEAD
 
     // --- Execute Function for Slash Command ---
     async executeSlash(interaction) {
@@ -197,6 +192,3 @@ module.exports = {
         }
     }
 };
-=======
-};
->>>>>>> b10663632ba29a22c353f7d06e01ba6a178b7bbb
