@@ -57,7 +57,7 @@ module.exports = {
                 if (!durationMs) return message.reply('Please provide a valid duration (e.g., 10m, 1h, 1d).');
                 
                 const endsAt = new Date(Date.now() + durationMs);
-                const embed = new EmbedBuilder().setColor('#f1c40f').setTitle(`🎁 ${prize} 🎁`).setDescription(`React with ${GIVEAWAY_EMOJI_TAG} to enter!\nEnds: <t:${Math.floor(endsAt.getTime() / 1000)}:R>\nHosted by: ${message.author}`).setFooter({ text: `${winnerCount} winner(s) | Ends at`}).setTimestamp(endsAt);
+                const embed = new EmbedBuilder().setColor('#f1c40f').setTitle(` ${prize} `).setDescription(`React with ${GIVEAWAY_EMOJI_TAG} to enter!\nEnds: <t:${Math.floor(endsAt.getTime() / 1000)}:R>\nHosted by: ${message.author}`).setFooter({ text: `${winnerCount} winner(s) | Ends at`}).setTimestamp(endsAt);
                 const defaultBanner = process.env.DEFAULT_GIVEAWAY_BANNER;
                 if (defaultBanner) embed.setImage(defaultBanner);
                 
@@ -138,7 +138,7 @@ module.exports = {
                     const durationMs = ms(duration);
                     if (!durationMs) return interaction.editReply({ content: 'You provided an invalid duration. Please use a format like `10m`, `1h`, or `7d`.' });
                     const endsAt = new Date(Date.now() + durationMs);
-                    const embed = new EmbedBuilder().setColor('#f1c40f').setTitle(`🎁 ${prize} 🎁`).setDescription(`React with ${GIVEAWAY_EMOJI_TAG} to enter!\nEnds: <t:${Math.floor(endsAt.getTime() / 1000)}:R>\nHosted by: ${interaction.user}`).setFooter({ text: `${winnerCount} winner(s) | Ends at`}).setTimestamp(endsAt);
+                    const embed = new EmbedBuilder().setColor('#f1c40f').setTitle(` ${prize} `).setDescription(`React with ${GIVEAWAY_EMOJI_TAG} to enter!\nEnds: <t:${Math.floor(endsAt.getTime() / 1000)}:R>\nHosted by: ${interaction.user}`).setFooter({ text: `${winnerCount} winner(s) | Ends at`}).setTimestamp(endsAt);
                     const defaultBanner = process.env.DEFAULT_GIVEAWAY_BANNER;
                     if (defaultBanner) embed.setImage(defaultBanner);
                     const giveawayMessage = await interaction.channel.send({ embeds: [embed] });
