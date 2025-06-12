@@ -5,10 +5,6 @@ async function endGiveaway(client, giveaway) {
     const channel = await client.channels.fetch(giveaway.channelId).catch(() => null);
     if (!channel) {
         console.error(`Giveaway End Error: Channel ${giveaway.channelId} could not be found.`);
-<<<<<<< HEAD
-=======
-        // Mark as ended to prevent retries
->>>>>>> b10663632ba29a22c353f7d06e01ba6a178b7bbb
         await Giveaway.updateOne({ _id: giveaway._id }, { ended: true });
         return;
     }
@@ -20,13 +16,8 @@ async function endGiveaway(client, giveaway) {
         return;
     }
 
-<<<<<<< HEAD
     // --- THE FIX: Look for your specific custom emoji ID ---
     const reaction = message.reactions.cache.get('1382330301006741566');
-=======
-    // --- THE FIX: Properly handle reaction fetching ---
-    const reaction = message.reactions.cache.get('🎉');
->>>>>>> b10663632ba29a22c353f7d06e01ba6a178b7bbb
     let participants = [];
 
     // Only fetch users if the reaction exists
@@ -60,20 +51,10 @@ async function endGiveaway(client, giveaway) {
     const announcement = winners.length > 0 
         ? `Congratulations ${winnerTags}! You won the **${giveaway.prize}**!`
         : 'No one entered the giveaway, so there are no winners.';
-<<<<<<< HEAD
 
-    const endedEmbed = new EmbedBuilder()
+     const endedEmbed = new EmbedBuilder()
         .setColor('#dc3545')
         .setTitle(` Giveaway Ended! `)
-        .setDescription(`**Prize:** ${giveaway.prize}\n\n**Winner(s):** ${winners.length > 0 ? winnerTags : 'None'}\nHosted by: <@${giveaway.hostedBy}>`)
-        .setTimestamp(giveaway.endsAt)
-        .setFooter({ text: 'Giveaway ended' });
-=======
->>>>>>> b10663632ba29a22c353f7d06e01ba6a178b7bbb
-
-    const endedEmbed = new EmbedBuilder()
-        .setColor('#dc3545')
-        .setTitle(`Giveaway Ended! `)
         .setDescription(`**Prize:** ${giveaway.prize}\n\n**Winner(s):** ${winners.length > 0 ? winnerTags : 'None'}\nHosted by: <@${giveaway.hostedBy}>`)
         .setTimestamp(giveaway.endsAt)
         .setFooter({ text: 'Giveaway ended' });
