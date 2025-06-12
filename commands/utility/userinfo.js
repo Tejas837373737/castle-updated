@@ -35,9 +35,9 @@ async function buildUserInfoEmbed(targetMember, requestingUser) {
     
     // --- Permissions Logic ---
     const importantServerPerms = [
-        { flag: 'Administrator', name: ' Admin' }, { flag: 'ManageGuild', name: '⚙️ Manage Server' },
-        { flag: 'ManageRoles', name: ' Manage Roles' }, { flag: 'ManageChannels', name: '🔧 Manage Channels' },
-        { flag: 'BanMembers', name: ' Ban Members' }, { flag: 'KickMembers', name: '👢 Kick Members' },
+        { flag: 'Administrator', name: ' Admin' }, { flag: 'ManageGuild', name: ' Manage Server' },
+        { flag: 'ManageRoles', name: ' Manage Roles' }, { flag: 'ManageChannels', name: ' Manage Channels' },
+        { flag: 'BanMembers', name: ' Ban Members' }, { flag: 'KickMembers', name: ' Kick Members' },
         { flag: 'ModerateMembers', name: ' Timeout' }
     ];
     const notableServerPerms = importantServerPerms
