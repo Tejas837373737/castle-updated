@@ -25,7 +25,7 @@ async function buildHelpPanel(client) {
             { name: 'Get Started', value: 'Use the dropdowns below to navigate commands or view settings.', inline: true }
         );
     if (linksString) {
-        mainEmbed.addFields({ name: '<:Heart_1:1382335432657997947> Quick Links', value: linksString, inline: false });
+        mainEmbed.addFields({ name: '<:links:1382722707740823562> Quick Links', value: linksString, inline: false });
     }
 
     // --- Dropdown for Command Categories ---
