@@ -63,8 +63,8 @@ module.exports = {
         const memoryUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
         const uptime = formatUptime(client.uptime);
         const readyStateMap = {
-            0: '<a:wrong:1381568998847545428> Disconnected',
-            1: '<a:Green_Tick:1381583016073363508> Connected',
+             0: '<:disconnect:1382722103295606804> Disconnected',
+            1: '<:connected:1382721986513338471> Connected',
             2: 'Connecting',
             3: 'Disconnecting',
         };
