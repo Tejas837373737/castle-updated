@@ -22,7 +22,7 @@ module.exports = {
 
             const pongEmbed = new EmbedBuilder()
                 .setColor('#0099ff')
-                .setTitle('<a:loadingapoints:1381563531110912063> Pong!')
+                .setTitle('<a:uptime:1382724374054043709> Latency')
                 .addFields(
                     { name: 'Round-trip Latency', value: `**${latency}ms**`, inline: true },
                     { name: 'API Latency', value: `**${apiLatency}ms**`, inline: true }
@@ -42,7 +42,7 @@ module.exports = {
 
         const pongEmbed = new EmbedBuilder()
             .setColor('#0099ff')
-            .setTitle('<a:loadingapoints:1381563531110912063> Pong!')
+            .setTitle('<a:uptime:1382724374054043709> Latency')
             .addFields(
                 { name: 'Round-trip Latency', value: `**${latency}ms**`, inline: true },
                 { name: 'API Latency', value: `**${apiLatency}ms**`, inline: true }
