@@ -75,11 +75,11 @@ module.exports = {
                 // This switch statement with your custom emojis is preserved
                 switch (selectedValue) {
                     case 'setting_mod_role':
-                        title = '<:Adminn:1382326000574136361> Moderator Role';
+                        title = '<:mod:1382722988050354266> Moderator Role';
                         description = `This role is required for moderation commands.\n\n**Currently Set To:** ${guildConfig?.modRole ? `<@&${guildConfig.modRole}>` : '`Not Set`'}\n**To Change:** \`${prefix}setmodrole @role\``;
                         break;
                     case 'setting_manager_role':
-                        title = '<:adminn1:1382325697963622481> Manager Role';
+                        title = '<:admin:1382722924309381221> Manager Role';
                         description = `This role is required for management commands.\n\n**Currently Set To:** ${guildConfig?.managerRoleId ? `<@&${guildConfig.managerRoleId}>` : '`Not Set`'}\n**To Change:** \`${prefix}setmanagerrole @role\``;
                         break;
                     case 'setting_log_channels':
