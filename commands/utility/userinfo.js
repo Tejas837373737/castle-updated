@@ -21,7 +21,7 @@ async function buildUserInfoEmbed(targetMember, requestingUser) {
     } else if (targetUser.bot) {
         acknowledgement = ' Bot';
     } else {
-        acknowledgement = '`<:member:1382321501663006741> Member`';
+        acknowledgement = '` Member`';
     }
 
     // --- Roles Logic ---
@@ -51,14 +51,14 @@ async function buildUserInfoEmbed(targetMember, requestingUser) {
         .setThumbnail(targetUser.displayAvatarURL({ dynamic: true, size: 256 }))
         .setImage(targetUser.bannerURL({ dynamic: true, size: 512 }))
         .addFields(
-            { name: '<:member:1382321501663006741> User', value: `${targetMember} (\`${targetUser.id}\`)`, inline: true },
-            { name: '<:aromaxcode:1381560953744785408> Nickname', value: `\`${targetMember.nickname || 'None'}\``, inline: true },
-            { name: '<:user:1382323085000315082> Acknowledgement', value: acknowledgement, inline: true },
-            { name: '<:0information:1382323298763014175> Account Created', value: `<t:${parseInt(targetUser.createdTimestamp / 1000)}:R>`, inline: true },
-            { name: '<:MekoJoin:1382323474470539285> Joined Server', value: `<t:${parseInt(targetMember.joinedTimestamp / 1000)}:R>`, inline: true },
-            { name: '<a:_DownArrow:1382323886582136935> Highest Role', value: `${targetMember.roles.highest}`, inline: true},
-            { name: `<a:_DownArrow:1382323886582136935> Roles [${userRoles.length}]`, value: rolesToDisplay, inline: false },
-            { name: '<:member:1382324110880800768> Notable Permissions', value: notableServerPerms || '`None`', inline: false }
+            { name: '<:user:1382323085000315082> User', value: `${targetMember} (\`${targetUser.id}\`)`, inline: true },
+            { name: '<:nickname:1382723234767831130> Nickname', value: `\`${targetMember.nickname || 'None'}\``, inline: true },
+            { name: '<:utilities:1382723355073052692> Acknowledgement', value: acknowledgement, inline: true },
+            { name: '<:calendar01:1383027832233660497> Account Created', value: `<t:${parseInt(targetUser.createdTimestamp / 1000)}:R>`, inline: true },
+            { name: '<:joineduser:1383034264039456884> Joined Server', value: `<t:${parseInt(targetMember.joinedTimestamp / 1000)}:R>`, inline: true },
+            { name: '<:highrole:1383034722107658271> Highest Role', value: `${targetMember.roles.highest}`, inline: true},
+            { name: `<:settings:1382325149235286030> Roles [${userRoles.length}]`, value: rolesToDisplay, inline: false },
+            { name: '<:commands:1382948394473095250> Notable Permissions', value: notableServerPerms || '`None`', inline: false }
         )
         .setTimestamp()
         .setFooter({ text: `Requested by ${requestingUser.username}`, iconURL: requestingUser.displayAvatarURL({ dynamic: true }) });
