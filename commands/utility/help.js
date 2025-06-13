@@ -45,8 +45,8 @@ async function buildHelpPanel(client) {
         .setCustomId('settings_select_menu')
         .setPlaceholder(' View & Manage Server Settings...')
         .addOptions([
-            { label: 'Moderator Role', description: 'View/Set the role for moderation commands.', value: 'setting_mod_role', emoji: '<:Adminn:1382326000574136361>' },
-            { label: 'Manager Role', description: 'View/Set the role for management commands.', value: 'setting_manager_role', emoji: '<:adminn1:1382325697963622481>' },
+            { label: 'Moderator Role', description: 'View/Set the role for moderation commands.', value: 'setting_mod_role', emoji: '<:mod:1382722988050354266>' },
+            { label: 'Manager Role', description: 'View/Set the role for management commands.', value: 'setting_manager_role', emoji: '<:admin:1382722924309381221>' },
             { label: 'Logging Channels', description: 'View/Set all logging channels.', value: 'setting_log_channels', emoji: '<:settings:1382325149235286030>' },
             { label: 'Message Counting', description: 'Manage channels for message counting.', value: 'setting_message_count', emoji: '<:chat:1382326680521277510>' }
         ]);
