@@ -28,8 +28,8 @@ module.exports = {
         const memoryUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
         const uptime = formatUptime(client.uptime);
         const readyStateMap = {
-            0: '<a:wrong:1381568998847545428> Disconnected',
-            1: '<a:Green_Tick:1381583016073363508> Connected',
+            0: '<:disconnect:1382722103295606804> Disconnected',
+            1: '<:connected:1382721986513338471> Connected',
             2: 'Connecting',
             3: 'Disconnecting',
         };
@@ -39,16 +39,16 @@ module.exports = {
             .setTitle(`${client.user.username}'s Statistics`)
             .setThumbnail(client.user.displayAvatarURL())
             .addFields(
-                { name: '🌐 Servers', value: `**${client.guilds.cache.size}**`, inline: true },
-                { name: '<:member:1382321501663006741> Users', value: `**${totalMembers.toLocaleString()}**`, inline: true },
-                { name: '<:aromaxcode:1381560953744785408> Commands', value: `**${totalCommands}**`, inline: true },
-                { name: 'Uptime', value: uptime, inline: false },
-                { name: 'API Latency', value: `**${Math.round(client.ws.ping)}** ms`, inline: true },
-                { name: 'RAM Usage', value: `**${memoryUsage}** MB`, inline: true },
-                { name: 'Database', value: dbStatus, inline: true },
-                { name: 'Discord.js Version', value: `v${djsVersion}`, inline: true },
-                { name: 'Node.js Version', value: process.version, inline: true },
-                { name: 'Bot Created', value: `<t:${parseInt(client.user.createdTimestamp / 1000)}:R>`, inline: true }
+                { name: '<:servers:1382722593571733614> Servers', value: `**${client.guilds.cache.size}**`, inline: true },
+                { name: '<:users:1382722651885146186> Users', value: `**${totalMembers.toLocaleString()}**`, inline: true },
+                { name: '<:utilities:1382723355073052692> Commands', value: `**${totalCommands}**`, inline: true },
+                { name: '<a:uptime:1382724374054043709> Uptime', value: uptime, inline: false },
+                { name: '<:connection:1382721918804824214> API Latency', value: `**${Math.round(client.ws.ping)}** ms`, inline: true },
+                { name: '<:rampc:1383037798721912942> RAM Usage', value: `**${memoryUsage}** MB`, inline: true },
+                { name: '<:databaseee:1383038066951848039> Database', value: dbStatus, inline: true },
+                { name: '<:DiscordJS:1383038234094993519> Discord.js Version', value: `v${djsVersion}`, inline: true },
+                { name: '<:nodeJS:1383038367981113399> Node.js Version', value: process.version, inline: true },
+                { name: '<:discord_bot:1383038477624414270> Bot Created', value: `<t:${parseInt(client.user.createdTimestamp / 1000)}:R>`, inline: true }
             )
             .setTimestamp()
             .setFooter({ text: `Requested by ${message.author.username}` });
@@ -75,16 +75,16 @@ module.exports = {
             .setTitle(`${client.user.username}'s Statistics`)
             .setThumbnail(client.user.displayAvatarURL())
             .addFields(
-                { name: '🌐 Servers', value: `**${client.guilds.cache.size}**`, inline: true },
-                { name: '<:member:1382321501663006741> Users', value: `**${totalMembers.toLocaleString()}**`, inline: true },
-                { name: '<:aromaxcode:1381560953744785408> Commands', value: `**${totalCommands}**`, inline: true },
-                { name: 'Uptime', value: uptime, inline: false },
-                { name: 'API Latency', value: `**${Math.round(client.ws.ping)}** ms`, inline: true },
-                { name: 'RAM Usage', value: `**${memoryUsage}** MB`, inline: true },
-                { name: 'Database', value: dbStatus, inline: true },
-                { name: 'Discord.js Version', value: `v${djsVersion}`, inline: true },
-                { name: 'Node.js Version', value: process.version, inline: true },
-                { name: 'Bot Created', value: `<t:${parseInt(client.user.createdTimestamp / 1000)}:R>`, inline: true }
+                { name: '<:servers:1382722593571733614> Servers', value: `**${client.guilds.cache.size}**`, inline: true },
+                { name: '<:users:1382722651885146186> Users', value: `**${totalMembers.toLocaleString()}**`, inline: true },
+                { name: '<:utilities:1382723355073052692> Commands', value: `**${totalCommands}**`, inline: true },
+                { name: '<a:uptime:1382724374054043709> Uptime', value: uptime, inline: false },
+                { name: '<:connection:1382721918804824214> API Latency', value: `**${Math.round(client.ws.ping)}** ms`, inline: true },
+                { name: '<:rampc:1383037798721912942> RAM Usage', value: `**${memoryUsage}** MB`, inline: true },
+                { name: '<:databaseee:1383038066951848039> Database', value: dbStatus, inline: true },
+                { name: '<:DiscordJS:1383038234094993519> Discord.js Version', value: `v${djsVersion}`, inline: true },
+                { name: '<:nodeJS:1383038367981113399> Node.js Version', value: process.version, inline: true },
+                { name: '<:discord_bot:1383038477624414270> Bot Created', value: `<t:${parseInt(client.user.createdTimestamp / 1000)}:R>`, inline: true }
             )
             .setTimestamp()
             .setFooter({ text: `Requested by ${interaction.user.username}` });
